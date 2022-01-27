@@ -1,0 +1,75 @@
+# 1. generate a new build (--environment=electron)
+# 2. push build to a repo for later use
+# 3. build electron
+
+no-response-timeout: 30
+build-electron:
+  box:
+    id: your/docker-electron-box
+    username: $DOCKER_ID
+    password: $DOCKER_PWD
+    tag: master
+  steps:
+    - add-to-known_hosts:
+        hostname: bitbucket.org
+        fingerprint: zzXQOXSRBEiUtuE8AikJYKwbHaxvSc0ojez9YXaGp1A
+        type: rsa
+
+    - script:
+        name: identify git
+        code: git config --global user.email "mail@domain.com" && git config --global user.name "username"
+
+    - add-ssh-key:
+        keyname: KEY_TO_ACCESS_ELECTRON
+
+    - script:
+        name: clone electron builder
+        code: git clone your-electron.git --branch main
+
+    - script:
+        name: npm install builder dependencies
+        code: npm i
+        cwd: your-electron
+
+    - add-ssh-key:
+        keyname: KEY_TO_ACCESS_ELECTRON_BUILDS
+
+    - script:
+        name: clone frontend electron build
+        code: git clone git@github.com:/electron-builds.git
+        cwd: your-electron
+
+    - script:
+        name: checkout build project branch
+        code: git checkout main
+        cwd: your-electron/electron-builds
+
+    - script:
+        name: move build files to electron source
+        code: mv -v electron-builds/* resources
+        cwd: your-electron
+
+    - script:
+        name: build windows electron distributable
+        code: npm run win -- -c.publish.url=http://domain.be/releases/production/
+        cwd: your-electron
+
+    - script:
+        name: display release files
+        code: ls -la
+        cwd: name-electron-release
+
+    - dereulenspiegel/ftp-deploy@1.1.4:
+        destination: ftp://ftp.domain.be/releases/production
+        username: $FTP_USER
+        password: $FTP_PASSWORD
+        subfolder: name-electron-release
+        
+
+    - leipert/add-ssh-key-gh-bb:
+        keyname: PUSH_SSH_V2
+
+    - script:
+        name: increment builder version
+        code: npm version patch --force && git push
+        cwd: your-electron
