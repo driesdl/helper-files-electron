@@ -5,21 +5,22 @@
 no-response-timeout: 30
 build-electron:
   box:
-    id: your/docker-electron-box
+    id: docker-username/docker-electron-box
     username: $DOCKER_ID
     password: $DOCKER_PWD
     tag: master
   steps:
-    - add-to-known_hosts:
-        hostname: bitbucket.org
-        fingerprint: zzXQOXSRBEiUtuE8AikJYKwbHaxvSc0ojez9YXaGp1A
-        type: rsa
+    #- add-to-known_hosts:
+    #    hostname: bitbucket.org
+    #    fingerprint: zzXQOXSRBEiUtuE8AikJYKwbHaxvSc0ojez9YXaGp1A
+    #    type: rsa
 
     - script:
         name: identify git
         code: git config --global user.email "mail@domain.com" && git config --global user.name "username"
 
     - add-ssh-key:
+        name: use ssh key to access repository of your electron project
         keyname: KEY_TO_ACCESS_ELECTRON
 
     - script:
@@ -32,7 +33,8 @@ build-electron:
         cwd: your-electron
 
     - add-ssh-key:
-        keyname: KEY_TO_ACCESS_ELECTRON_BUILDS
+        name: use ssh key to access the repo of your compiled code
+        keyname: KEY_TO_ACCESS_ELECTRON_BUILD_REPO
 
     - script:
         name: clone frontend electron build
@@ -51,7 +53,7 @@ build-electron:
 
     - script:
         name: build windows electron distributable
-        code: npm run win -- -c.publish.url=http://domain.be/releases/production/
+        code: npm run win -- -c.publish.url=https://domain.com/releases/production/
         cwd: your-electron
 
     - script:
