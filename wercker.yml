@@ -1,5 +1,36 @@
 # 1. generate a new build (--environment=electron)
 # 2. push build to a repo for later use
+# push:
+#     box:
+#         id: node:boron
+#         username: $DOCKER_ID
+#         password: $DOCKER_PWD
+#     steps:
+#         - samverschueren/package-version
+
+#         - leipert/add-ssh-key-gh-bb:
+#               keyname: SSH_KEY
+
+#         # Add bitbucket to known hosts, so they won't ask us whether we trust bitbucket
+#         - add-to-known_hosts:
+#               hostname: bitbucket.org
+#               fingerprint: zzXQOXSRBEiUtuE8AikJYKwbHaxvSc0ojez9YXaGp1A
+#               type: rsa
+
+#         - leipert/git-push@0.7.6:
+#               host: bitbucket.org
+#               repo: org/repo
+#               branch: branch-name
+#               basedir: dist
+#               debug: true
+#               clean_removed_files: true
+#               tag: $PACKAGE_VERSION
+#               tag_overwrite: true
+
+#     after-steps:
+#         - ally/bugsnag-deploy-tracking-notify:
+#           api_key: 
+#           release_stage: "production"
 # 3. build electron
 
 no-response-timeout: 30
